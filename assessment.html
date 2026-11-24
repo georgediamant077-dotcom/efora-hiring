@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assessment Center | Efora Management</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="in"><div class="logo">EFORA <span>MANAGEMENT</span></div><div class="step" id="stepLabel">Assessment Center</div></div></header>
+<main id="main">
+
+<section class="card view" data-view="loading"><p>Loading your assessment...</p></section>
+
+<section class="card view hidden" data-view="error">
+  <h1>Sorry</h1>
+  <p id="errText"></p>
+  <p class="muted">If you think this is a mistake, contact us on Telegram.</p>
+</section>
+
+<section class="card view hidden" data-view="mobile">
+  <h1>Please use a PC or laptop</h1>
+  <p>This assessment only works on a computer (Windows or Mac) with a webcam. Open the same link on your PC or laptop.</p>
+</section>
+
+<section class="card view hidden" data-view="welcome">
+  <h1>Welcome, <span id="who"></span></h1>
+  <p>This is Step 2 of our application process: the Assessment Center. It takes around <b>1 hour</b>. You must finish it before <b id="deadline"></b>.</p>
+  <h2>What you will do</h2>
+  <div id="plan"></div>
+  <h2>Rules</h2>
+  <p>- Work alone, in a quiet place, without help from other people, translators or AI tools.<br>
+     - Stay in full screen and do not switch tabs or windows. Every switch is recorded.<br>
+     - Copy and paste are disabled.<br>
+     - Once a section starts, its timer cannot be paused.</p>
+  <div class="note">
+    <b>Camera and screen recording</b><br>
+    During the whole assessment we take <b>a photo with your webcam and a screenshot of your screen every 30 seconds</b>, to make sure you work alone and do not use other tools.
+    The photos are only seen by the Efora Management hiring team and are deleted automatically after 30 days.
+    You will need to allow camera access and share your <b>entire screen</b>. If you turn off the camera or stop sharing your screen, the assessment is paused and this is recorded.
+  </div>
+  <label class="check"><input type="checkbox" id="consent"> I have read the rules and I agree that my webcam and screen are captured every 30 seconds during this assessment.</label>
+  <div class="err hidden" id="errWelcome"></div>
+  <div class="actions"><span></span><button class="btn" id="toSetup">Continue</button></div>
+</section>
+
+<section class="card view hidden" data-view="setup">
+  <h1>Set up</h1>
+  <p>Complete the 3 steps below. Your browser will ask for permission: click <b>Allow</b>.</p>
+  <h3>1. Turn on your camera</h3>
+  <button class="btn" id="btnCam">Turn on camera</button> <span id="camOk" class="hidden" style="color:var(--ok);font-weight:600">&#10003; Camera on</span>
+  <h3>2. Share your entire screen</h3>
+  <p class="muted">In the window that opens, choose <b>Entire screen</b> (not a window or a tab) and click Share.</p>
+  <button class="btn" id="btnScreen" disabled>Share entire screen</button> <span id="scrOk" class="hidden" style="color:var(--ok);font-weight:600">&#10003; Screen shared</span>
+  <h3>3. Start in full screen</h3>
+  <button class="btn" id="btnStart" disabled>Start assessment in full screen</button>
+  <div class="err hidden" id="errSetup"></div>
+</section>
+
+<section class="view hidden" data-view="sectionIntro">
+  <div class="card">
+    <p class="muted" id="secCount"></p>
+    <h1 id="secTitle"></h1>
+    <p id="secInfo"></p>
+    <div class="actions"><span></span><button class="btn" id="secStart">Start this section</button></div>
+  </div>
+</section>
+
+<section class="view hidden" data-view="test">
+  <div class="timer" id="timer"></div>
+  <div class="card">
+    <h2 style="margin-top:0" id="testTitle"></h2>
+    <p class="muted" id="testIntro"></p>
+    <div id="testBox"></div>
+    <div class="actions"><span class="muted" id="answered"></span><button class="btn" id="secSubmit">Submit this section</button></div>
+  </div>
+</section>
+
+<section class="view hidden" data-view="essay">
+  <div class="timer" id="etimer"></div>
+  <div class="card">
+    <p class="muted" id="essayCount"></p>
+    <div class="essay-q no-select" id="essayQ"></div>
+    <textarea id="essayA" spellcheck="false" autocomplete="off" style="min-height:160px"></textarea>
+    <div class="actions"><span class="muted">The next question opens automatically when the time is up.</span><button class="btn" id="essayNext">Next</button></div>
+  </div>
+</section>
+
+<section class="card view hidden" data-view="sending">
+  <h2 style="margin-top:0">Submitting your assessment...</h2>
+  <p>Please do not close this page.</p>
+</section>
+
+<section class="card view hidden" data-view="done">
+  <h1>Thank you!</h1>
+  <p>Your assessment has been submitted. You can now close this page. We will contact you on Telegram.</p>
+</section>
+
+</main>
+
+<div class="overlay hidden" id="overlay"><div class="box">
+  <h2 id="ovTitle"></h2><p id="ovText"></p>
+  <button class="btn" id="ovBtn"></button>
+</div></div>
+<div class="toast hidden" id="toast"></div>
+<video id="camVideo" class="camprev hidden" autoplay muted playsinline></video>
+<video id="scrVideo" autoplay muted playsinline style="position:fixed;left:-9999px;width:10px;height:10px"></video>
+
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script>
+var CAPTURE_EVERY = 30000;
+var token = new URLSearchParams(location.search).get('t') || '';
+var KEY = 'efora_assess_' + token;
+var data = null;          // from server
+var st = store(KEY) || {section: 0, answers: {}, essays: [], essayIndex: 0, deadlines: {}, counters: {tabSwitches: 0, pasteAttempts: 0, fullscreenExits: 0, mediaStops: 0}};
+var camStream = null, scrStream = null, inTest = false, captureTimer = null, stopTimer = null, finished = false;
+
+function save() { store(KEY, st); }
+function view(v) {
+  $all('.view').forEach(function (s) { s.classList.toggle('hidden', s.dataset.view !== v); });
+  window.scrollTo(0, 0);
+}
+function fail(id, msg) { var e = $(id); e.textContent = msg; e.classList.toggle('hidden', !msg); }
+function toast(msg) {
+  var t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toast.h); toast.h = setTimeout(function () { t.classList.add('hidden'); }, 3500);
+}
+function logEvent(type, detail) { api('event', {token: token, type: type, detail: detail || ''}).catch(function () {}); }
+
+// ---------- start ----------
+if (!token) { $('#errText').textContent = 'This link is not complete. Please use the exact link we sent you.'; view('error'); }
+else if (isMobile()) { view('mobile'); }
+else {
+  api('assessStart', {token: token}).then(function (r) {
+    if (!r.ok) { $('#errText').textContent = r.error; view('error'); return; }
+    data = r;
+    $('#who').textContent = r.name;
+    $('#deadline').textContent = new Date(r.deadline).toLocaleString();
+    var plan = r.tests.map(function (t, i) {
+      return (i + 1) + '. ' + esc(t.title) + ': ' + t.questions.length + ' questions, ' + t.minutes + ' minutes';
+    });
+    plan.push((r.tests.length + 1) + '. ' + esc(r.essays.title) + ': ' + r.essays.questions.length + ' questions, 1 minute each');
+    $('#plan').innerHTML = '<p>' + plan.join('<br>') + '</p>';
+    view('welcome');
+  }).catch(function () {
+    $('#errText').textContent = 'Could not connect. Please check your internet and reload the page.';
+    view('error');
+  });
+}
+
+$('#toSetup').onclick = function () {
+  if (!$('#consent').checked) return fail('#errWelcome', 'Please tick the box to agree before you continue.');
+  fail('#errWelcome', ''); view('setup');
+};
+
+// ---------- setup: camera, screen, full screen ----------
+$('#btnCam').onclick = function () {
+  navigator.mediaDevices.getUserMedia({video: {width: 640, height: 480}, audio: false}).then(function (s) {
+    camStream = s;
+    $('#camVideo').srcObject = s; $('#camVideo').classList.remove('hidden');
+    s.getVideoTracks()[0].addEventListener('ended', function () { mediaLost('camera'); });
+    $('#camOk').classList.remove('hidden'); $('#btnCam').disabled = true; $('#btnScreen').disabled = false;
+    fail('#errSetup', '');
+  }).catch(function (e) {
+    fail('#errSetup', 'Camera access was blocked (' + e.name + '). Click the camera icon in the address bar, allow the camera, and try again. A working webcam is required.');
+  });
+};
+
+$('#btnScreen').onclick = function () { askScreen().then(function () {
+  $('#scrOk').classList.remove('hidden'); $('#btnScreen').disabled = true; $('#btnStart').disabled = false;
+}); };
+
+var pickerOpen = false;  // the browser's own permission/picker windows take focus: not a tab switch
+function askScreen() {
+  pickerOpen = true;
+  return navigator.mediaDevices.getDisplayMedia({video: {displaySurface: 'monitor'}, audio: false}).then(function (s) {
+    var track = s.getVideoTracks()[0];
+    var surface = track.getSettings().displaySurface;
+    if (surface && surface !== 'monitor') {
+      s.getTracks().forEach(function (t) { t.stop(); });
+      fail('#errSetup', 'You shared a window or a tab. Please share your ENTIRE screen.');
+      throw new Error('not monitor');
+    }
+    scrStream = s;
+    $('#scrVideo').srcObject = s;
+    track.addEventListener('ended', function () { mediaLost('screen'); });
+    fail('#errSetup', '');
+    setTimeout(function () { pickerOpen = false; }, 1500);
+  }).catch(function (e) {
+    setTimeout(function () { pickerOpen = false; }, 1500);
+    if (e && e.message !== 'not monitor') fail('#errSetup', 'Screen sharing was cancelled. You must share your entire screen to take the assessment.');
+    throw e;
+  });
+}
+
+$('#btnStart').onclick = function () {
+  goFullscreen().then(function () {
+    inTest = true;
+    logEvent('setup_done', 'camera + screen + full screen');
+    startCapture();
+    next();
+  });
+};
+
+function goFullscreen() {
+  return document.documentElement.requestFullscreen().catch(function () {
+    fail('#errSetup', 'Full screen was blocked by your browser. Please use Google Chrome or Microsoft Edge.');
+    throw new Error('fs');
+  });
+}
+
+// ---------- proctoring ----------
+function grab(video, maxW, q) {
+  if (!video.videoWidth) return null;
+  var w = Math.min(maxW, video.videoWidth), h = Math.round(video.videoHeight * w / video.videoWidth);
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  c.getContext('2d').drawImage(video, 0, 0, w, h);
+  return c.toDataURL('image/jpeg', q).split(',')[1];
+}
+function captureNow() {
+  if (finished) return;
+  var cam = grab($('#camVideo'), 480, 0.6), scr = grab($('#scrVideo'), 1280, 0.6);
+  if (cam) api('proctor', {token: token, kind: 'camera', data: cam}).catch(function () {});
+  if (scr) api('proctor', {token: token, kind: 'screen', data: scr}).catch(function () {});
+}
+function startCapture() {
+  if (captureTimer) return;
+  setTimeout(captureNow, 3000);
+  captureTimer = setInterval(captureNow, CAPTURE_EVERY);
+}
+
+function mediaLost(which) {
+  if (finished || !inTest) return;
+  st.counters.mediaStops++; save();
+  logEvent(which + '_stopped', '');
+  showOverlay(which === 'camera' ? 'Your camera turned off' : 'Screen sharing stopped',
+    'The assessment is paused until you turn it back on. Your timer is still running.',
+    which === 'camera' ? 'Turn camera back on' : 'Share entire screen again',
+    function () {
+      var p = which === 'camera'
+        ? navigator.mediaDevices.getUserMedia({video: {width: 640, height: 480}}).then(function (s) {
+            camStream = s; $('#camVideo').srcObject = s;
+            s.getVideoTracks()[0].addEventListener('ended', function () { mediaLost('camera'); });
+          })
+        : askScreen();
+      return p.then(function () { logEvent(which + '_restored', ''); });
+    });
+}
+
+function showOverlay(title, text, btn, action) {
+  $('#ovTitle').textContent = title; $('#ovText').textContent = text; $('#ovBtn').textContent = btn;
+  $('#overlay').classList.remove('hidden');
+  $('#ovBtn').onclick = function () {
+    action().then(function () { $('#overlay').classList.add('hidden'); checkState(); }).catch(function () {});
+  };
+}
+
+// after one problem is fixed, check that nothing else is still wrong
+function checkState() {
+  if (!inTest || finished) return;
+  if (!document.fullscreenElement) return fsLost();
+}
+
+function fsLost() {
+  showOverlay('You left full screen', 'This has been recorded. Go back to full screen to continue. Your timer is still running.',
+    'Back to full screen', goFullscreen);
+}
+
+document.addEventListener('fullscreenchange', function () {
+  if (!inTest || finished || document.fullscreenElement) return;
+  st.counters.fullscreenExits++; save();
+  logEvent('fullscreen_exit', '');
+  fsLost();
+});
+
+var lastSwitch = 0;
+function switched(how) {
+  if (!inTest || finished || pickerOpen) return;
+  if (Date.now() - lastSwitch < 1500) return;
+  lastSwitch = Date.now();
+  st.counters.tabSwitches++; save();
+  logEvent('left_page', how);
+  toast('Leaving the assessment page is not allowed. This has been recorded.');
+}
+document.addEventListener('visibilitychange', function () { if (document.hidden) switched('tab hidden'); });
+window.addEventListener('blur', function () { switched('window lost focus'); });
+
+['copy', 'cut', 'paste', 'drop', 'contextmenu'].forEach(function (ev) {
+  document.addEventListener(ev, function (e) {
+    if (!inTest || finished) return;
+    e.preventDefault();
+    if (ev === 'contextmenu') return;
+    st.counters.pasteAttempts++; save();
+    logEvent(ev + '_blocked', '');
+    toast('Copy and paste are disabled. This has been recorded.');
+  });
+});
+document.addEventListener('keyup', function (e) {
+  if (inTest && !finished && e.key === 'PrintScreen') logEvent('printscreen_key', '');
+});
+window.addEventListener('beforeunload', function (e) {
+  if (inTest && !finished) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// ---------- sections ----------
+function next() {
+  var tests = data.tests;
+  if (st.section < tests.length) return sectionIntro(tests[st.section]);
+  if (st.section === tests.length) return essayStart();
+  submit();
+}
+
+function sectionIntro(t) {
+  var dl = st.deadlines[t.id];
+  if (dl) return runSection(t);  // section already running (page was reloaded)
+  $('#secCount').textContent = 'Section ' + (st.section + 1) + ' of ' + (data.tests.length + 1);
+  $('#secTitle').textContent = t.title;
+  $('#secInfo').textContent = t.questions.length + ' questions, ' + t.minutes + ' minutes. The timer starts when you click Start.';
+  view('sectionIntro');
+  $('#secStart').onclick = function () {
+    st.deadlines[t.id] = Date.now() + t.minutes * 60000; save();
+    logEvent('section_start', t.title);
+    runSection(t);
+  };
+}
+
+function runSection(t) {
+  $('#testTitle').textContent = t.title;
+  $('#testIntro').textContent = t.intro;
+  var read = renderTest($('#testBox'), t, 1);
+  var saved = st.answers[t.id] || {};
+  Object.keys(saved).forEach(function (qid) {
+    var r = $('input[name="' + t.id + '_' + qid + '"][value="' + saved[qid] + '"]');
+    if (r) { r.checked = true; r.closest('.opt').classList.add('sel'); }
+  });
+  function count() {
+    st.answers[t.id] = read(); save();
+    $('#answered').textContent = Object.keys(st.answers[t.id]).length + ' of ' + t.questions.length + ' answered';
+  }
+  $('#testBox').onchange = count; count();
+  view('test');
+  var done = false;
+  function finish(timeUp) {
+    if (done) return;
+    if (!timeUp && Object.keys(read()).length < t.questions.length && !confirm('You did not answer all questions. Submit this section anyway?')) return;
+    done = true; stopTimer(); count();
+    logEvent('section_end', t.title + (timeUp ? ' (time up)' : ''));
+    st.section++; save(); next();
+  }
+  stopTimer = countdown($('#timer'), st.deadlines[t.id], function () { finish(true); });
+  $('#secSubmit').onclick = function () { finish(false); };
+}
+
+function essayStart() {
+  var e = data.essays;
+  if (st.essayIndex >= e.questions.length) { st.section++; save(); return next(); }
+  if (!st.deadlines.essays && st.essayIndex === 0 && !st.essayIntroSeen) {
+    $('#secCount').textContent = 'Section ' + (data.tests.length + 1) + ' of ' + (data.tests.length + 1);
+    $('#secTitle').textContent = e.title;
+    $('#secInfo').textContent = e.intro;
+    view('sectionIntro');
+    $('#secStart').onclick = function () { st.essayIntroSeen = true; save(); essayRun(); };
+    return;
+  }
+  essayRun();
+}
+
+function essayRun() {
+  var e = data.essays, i = st.essayIndex;
+  var dkey = 'essay' + i;
+  if (!st.deadlines[dkey]) { st.deadlines[dkey] = Date.now() + e.secondsEach * 1000; save(); }
+  $('#essayCount').textContent = 'Question ' + (i + 1) + ' of ' + e.questions.length;
+  $('#essayQ').textContent = e.questions[i];
+  var box = $('#essayA');
+  box.value = st.essays[i] || '';
+  box.oninput = function () { st.essays[i] = box.value; save(); };
+  view('essay'); box.focus();
+  var done = false;
+  function go() {
+    if (done) return; done = true; stopTimer();
+    st.essays[i] = box.value; st.essayIndex++; save();
+    essayStart();
+  }
+  stopTimer = countdown($('#etimer'), st.deadlines[dkey], go);
+  $('#essayNext').onclick = go;
+}
+
+function submit() {
+  view('sending');
+  captureNow();
+  api('assessSubmit', {token: token, answers: st.answers, essays: st.essays, counters: st.counters}).then(function (r) {
+    if (!r.ok) throw new Error(r.error);
+    finished = true; inTest = false;
+    clearInterval(captureTimer);
+    [camStream, scrStream].forEach(function (s) { if (s) s.getTracks().forEach(function (t) { t.stop(); }); });
+    $('#camVideo').classList.add('hidden');
+    if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    view('done');
+  }).catch(function () {
+    showOverlay('Could not submit', 'Please check your internet connection and try again.', 'Try again', function () {
+      return Promise.resolve().then(submit);
+    });
+  });
+}
+</script>
+</body>
+</html>

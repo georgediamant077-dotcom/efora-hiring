@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OnlyFans Chatter Application (PH Only) | Efora Management</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="in"><div class="logo">EFORA <span>MANAGEMENT</span></div><div class="step" id="stepLabel">Page 1 of 3</div></div></header>
+<main>
+<div class="progress"><div id="bar" style="width:33%"></div></div>
+
+<!-- PAGE 1 -->
+<section class="card page" data-page="1">
+  <h1>OnlyFans Chatter Application (PH Only)</h1>
+  <div class="note">&#10071;&#65039; Please read this carefully before you start. We only want applicants who are reliable, consistent, and able to follow instructions. &#10071;&#65039;</div>
+  <p>This job is OnlyFans chatting with a clear focus on sales and revenue. Your main responsibility is handling DMs: building rapport, keeping conversations active, and converting fans through upsells and PPV. We work with scripts and SOPs, but we also expect creativity when needed. &#128293;</p>
+  <h2>Requirements</h2>
+  <p>- Philippines based &#127477;&#127469;<br>- PC/Laptop only (no mobile work) &#128187;<br>- Stable internet connection &#128732; &#9889;&#65039;<br>- Backup internet<br>- Backup power<br>- Able to work 8 hours per shift<br>- 6 days per week &#128170;&#127995;</p>
+  <h2>Application process</h2>
+  <p>This form has 3 pages and takes around 25-30 minutes. On Page 2 you will provide basic information and complete a social intelligence test, a typing speed test and an internet test. On Page 3 you will take a short English test (20 minutes). If you pass this step, you will move to the next stage (assessment).</p>
+  <p>We strongly recommend being honest and completing everything by yourself, without help from other people or AI tools. We check consistency and quality.</p>
+  <h2>Please confirm</h2>
+  <label class="check"><input type="checkbox" class="conf"> I confirm I am based in the Philippines</label>
+  <label class="check"><input type="checkbox" class="conf"> I confirm I can work 6 days/week including weekends</label>
+  <label class="check"><input type="checkbox" class="conf"> I confirm I can work any of the 3 shifts and I'm flexible</label>
+  <label class="check"><input type="checkbox" class="conf"> I confirm I have a PC/Laptop and good internet connection</label>
+  <label class="f">On which platform did you find us? <span class="req">*</span></label>
+  <div id="platforms"></div>
+  <div class="err hidden" id="err1"></div>
+  <div class="actions"><span></span><button class="btn" id="next1">Apply</button></div>
+  <p class="muted" style="margin-top:20px">Good Luck &#127808;</p>
+</section>
+
+<!-- PAGE 2 -->
+<section class="card page hidden" data-page="2">
+  <h2 style="margin-top:0">Personal details</h2>
+  <div class="row">
+    <div><label class="f">First name <span class="req">*</span></label><input type="text" id="firstName" autocomplete="given-name"></div>
+    <div><label class="f">Last name <span class="req">*</span></label><input type="text" id="lastName" autocomplete="family-name"></div>
+  </div>
+  <div class="row">
+    <div><label class="f">Age <span class="req">*</span></label><input type="number" id="age" min="18" max="80"></div>
+    <div><label class="f">Phone number <span class="req">*</span></label><input type="tel" id="phone"></div>
+  </div>
+  <div class="row">
+    <div><label class="f">Telegram <span class="req">*</span></label><input type="text" id="telegram" placeholder="@username"></div>
+    <div><label class="f">E-Mail <span class="req">*</span></label><input type="email" id="email"></div>
+  </div>
+  <label class="f">Explain your current living situation (where do you work from? what is your backup if power or internet fails? etc.) <span class="req">*</span></label>
+  <textarea id="living"></textarea>
+
+  <h2>Professional details</h2>
+  <label class="f">Your CV</label>
+  <input type="file" id="cv" accept=".pdf,.doc,.docx,image/*"><div class="file-hint">PDF, Word or image, max 10 MB</div>
+
+  <div class="note">&#10071;&#65039; SCREENSHOTS ARE ONLY ACCEPTED AS DESCRIBED &#10071;&#65039;<br>Click on every link and upload a screenshot of your results. The screenshot has to show the DATE &amp; TIME of your device. After this, write your result in the box below it.</div>
+
+  <h3>Emotional Intelligence Test</h3>
+  <p><a href="https://psytests.org/eq/stemen-run.html" target="_blank" rel="noopener">https://psytests.org/eq/stemen-run.html</a></p>
+  <label class="f">Screenshot <span class="req">*</span></label><input type="file" id="eqShot" accept="image/*">
+  <label class="f">Emotional Intelligence Result <span class="req">*</span></label><input type="text" id="eqResult">
+
+  <h3>Typing Speed Test</h3>
+  <p><a href="https://monkeytype.com" target="_blank" rel="noopener">https://monkeytype.com</a></p>
+  <label class="f">Screenshot <span class="req">*</span></label><input type="file" id="typingShot" accept="image/*">
+  <label class="f">Typing Speed Test Result <span class="req">*</span></label><input type="text" id="typingResult">
+
+  <h3>Internet Speed Test</h3>
+  <p><a href="https://www.speedtest.net" target="_blank" rel="noopener">https://www.speedtest.net</a></p>
+  <label class="f">Screenshot <span class="req">*</span></label><input type="file" id="internetShot" accept="image/*">
+  <label class="f">Internet Speed Test Result <span class="req">*</span></label><input type="text" id="internetResult">
+
+  <h3>Work Setup</h3>
+  <label class="f">A selfie of yourself with your work setup in the background <span class="req">*</span></label>
+  <input type="file" id="selfie" accept="image/*">
+
+  <label class="f">Do you have experience as an OnlyFans chatter? <span class="req">*</span></label>
+  <label class="opt"><input type="radio" name="experience" value="Yes"><span>Yes</span></label>
+  <label class="opt"><input type="radio" name="experience" value="No"><span>No</span></label>
+  <label class="f">Tell us a bit about your experience as a chatter</label>
+  <textarea id="experienceDetails"></textarea>
+
+  <label class="f">Preferred working hours (multiple choice) <span class="req">*</span></label>
+  <label class="opt"><input type="checkbox" class="shift" value="4AM - 12PM (PH Time)"><span>4AM - 12PM (PH Time)</span></label>
+  <label class="opt"><input type="checkbox" class="shift" value="12PM - 8PM (PH Time)"><span>12PM - 8PM (PH Time)</span></label>
+  <label class="opt"><input type="checkbox" class="shift" value="8PM - 4AM (PH Time)"><span>8PM - 4AM (PH Time)</span></label>
+
+  <h2>Strike &amp; Growth System</h2>
+  <p>We work with a strike system to ensure quality and reliability. Strikes are given for careless mistakes, such as forgetting follow-ups or other avoidable errors. However, we also believe in rewarding high performance.</p>
+  <p>Before submitting this form, please put the word "t-rex" before your text in the box "further information".</p>
+  <p>Team members who consistently deliver outstanding results have the opportunity to be promoted to Supervisor or get Bonuses. This role comes with higher pay.</p>
+  <label class="f">Further Information</label>
+  <textarea id="furtherInfo"></textarea>
+
+  <div class="err hidden" id="err2"></div>
+  <div class="actions"><button class="btn sec" id="back2">Back</button><button class="btn" id="next2">Next: English test</button></div>
+</section>
+
+<!-- PAGE 3 intro -->
+<section class="card page hidden" data-page="3">
+  <h1>English Test</h1>
+  <p>25 questions. You have <b>20 minutes</b>. The timer starts when you click Start, and the test is submitted automatically when the time is up.</p>
+  <p>Do it alone, without help from other people, translators or AI tools.</p>
+  <div class="actions"><button class="btn sec" id="back3">Back</button><button class="btn" id="startTest">Start the English test</button></div>
+</section>
+
+<!-- PAGE 3 test -->
+<section class="page hidden" data-page="3t">
+  <div class="timer" id="timer"></div>
+  <div class="card">
+    <p class="muted" id="testIntro"></p>
+    <div id="testBox"></div>
+    <div class="err hidden" id="err3"></div>
+    <div class="actions"><span class="muted" id="answered"></span><button class="btn" id="submitAll">Submit application</button></div>
+  </div>
+</section>
+
+<!-- DONE -->
+<section class="card page hidden" data-page="done">
+  <h1>Thank you for applying!</h1>
+  <p>We'll be in touch very soon.</p>
+  <p class="muted" id="refLine"></p>
+</section>
+
+<!-- SENDING -->
+<section class="card page hidden" data-page="sending">
+  <h2 style="margin-top:0">Sending your application...</h2>
+  <p>Please do not close this page. Uploading your files can take a minute.</p>
+</section>
+</main>
+
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script>
+var PLATFORMS = ['OFMJobs', 'DonutJobs', 'Onlinejobs.ph', 'Reddit', 'Facebook', 'Telegram', 'Discord'];
+var MAX_FILE = 10 * 1024 * 1024;
+var formTest = null, readAnswers = null, stopTimer = null, sent = false;
+
+$('#platforms').innerHTML = PLATFORMS.map(function (p) {
+  return '<label class="opt"><input type="radio" name="platform" value="' + p + '"><span>' + p + '</span></label>';
+}).join('');
+
+function show(page) {
+  $all('.page').forEach(function (s) { s.classList.toggle('hidden', s.dataset.page !== page); });
+  var n = page === '1' ? 1 : page === '2' ? 2 : 3;
+  $('#stepLabel').textContent = page === 'done' ? 'Done' : 'Page ' + n + ' of 3';
+  $('#bar').style.width = (page === 'done' ? 100 : n * 33) + '%';
+  window.scrollTo(0, 0);
+}
+function fail(id, msg) { var e = $(id); e.textContent = msg; e.classList.toggle('hidden', !msg); }
+
+$('#next1').onclick = function () {
+  if ($all('.conf').some(function (c) { return !c.checked; })) return fail('#err1', 'Please confirm all 4 points.');
+  if (!$('input[name=platform]:checked')) return fail('#err1', 'Please tell us where you found us.');
+  fail('#err1', ''); show('2');
+};
+$('#back2').onclick = function () { show('1'); };
+$('#back3').onclick = function () { show('2'); };
+
+function val(id) { return $('#' + id).value.trim(); }
+
+$('#next2').onclick = function () {
+  var req = ['firstName', 'lastName', 'age', 'phone', 'telegram', 'email', 'living', 'eqResult', 'typingResult', 'internetResult'];
+  for (var i = 0; i < req.length; i++) if (!val(req[i])) return fail('#err2', 'Please fill in all fields marked with *.');
+  if (Number(val('age')) < 18) return fail('#err2', 'You must be at least 18 years old.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('email'))) return fail('#err2', 'Please enter a valid e-mail address.');
+  var files = ['eqShot', 'typingShot', 'internetShot', 'selfie'];
+  for (var j = 0; j < files.length; j++) if (!$('#' + files[j]).files[0]) return fail('#err2', 'Please upload all screenshots and the selfie.');
+  var all = ['cv'].concat(files);
+  for (var k = 0; k < all.length; k++) {
+    var f = $('#' + all[k]).files[0];
+    if (f && f.size > MAX_FILE) return fail('#err2', 'The file "' + f.name + '" is larger than 10 MB.');
+  }
+  if (!$('input[name=experience]:checked')) return fail('#err2', 'Please answer if you have chatter experience.');
+  if (!$all('.shift').some(function (c) { return c.checked; })) return fail('#err2', 'Please choose at least one preferred shift.');
+  fail('#err2', '');
+  show('3');
+  if (!formTest) api('formTest').then(function (r) { if (r.ok) formTest = r.test; });
+};
+
+$('#startTest').onclick = function () {
+  var btn = this;
+  btn.disabled = true; btn.textContent = 'Loading...';
+  (formTest ? Promise.resolve({ok: true, test: formTest}) : api('formTest')).then(function (r) {
+    if (!r.ok) throw new Error(r.error);
+    formTest = r.test;
+    $('#testIntro').textContent = formTest.intro;
+    readAnswers = renderTest($('#testBox'), formTest, 1);
+    show('3t');
+    $('#testBox').addEventListener('change', updateCount);
+    updateCount();
+    stopTimer = countdown($('#timer'), Date.now() + formTest.minutes * 60000, function () { submitAll(true); });
+  }).catch(function () {
+    btn.disabled = false; btn.textContent = 'Start the English test';
+    alert('Could not load the test. Please check your internet and try again.');
+  });
+};
+
+function updateCount() {
+  var n = Object.keys(readAnswers()).length;
+  $('#answered').textContent = n + ' of ' + formTest.questions.length + ' answered';
+}
+
+// no copying the questions out
+document.addEventListener('copy', function (e) { if (!$('[data-page="3t"]').classList.contains('hidden')) e.preventDefault(); });
+
+$('#submitAll').onclick = function () { submitAll(false); };
+
+function submitAll(timeUp) {
+  if (sent) return;
+  var answers = readAnswers();
+  if (!timeUp && Object.keys(answers).length < formTest.questions.length) {
+    if (!confirm('You did not answer all questions. Submit anyway?')) return;
+  }
+  sent = true;
+  if (stopTimer) stopTimer();
+  show('sending');
+  var fileIds = [['cv', 'CV'], ['eqShot', 'EQ screenshot'], ['typingShot', 'Typing screenshot'], ['internetShot', 'Internet screenshot'], ['selfie', 'Work setup selfie']];
+  Promise.all(fileIds.map(function (p) {
+    var f = $('#' + p[0]).files[0];
+    if (!f) return null;
+    return fileToBase64(f).then(function (data) { return {label: p[1], name: f.name, mime: f.type, data: data}; });
+  })).then(function (files) {
+    return api('apply', {
+      fields: {
+        firstName: val('firstName'), lastName: val('lastName'), age: val('age'), phone: val('phone'),
+        telegram: val('telegram'), email: val('email'), living: val('living'),
+        platform: $('input[name=platform]:checked').value,
+        experience: $('input[name=experience]:checked').value, experienceDetails: val('experienceDetails'),
+        shifts: $all('.shift').filter(function (c) { return c.checked; }).map(function (c) { return c.value; }),
+        furtherInfo: val('furtherInfo'), eqResult: val('eqResult'), typingResult: val('typingResult'),
+        internetResult: val('internetResult')
+      },
+      files: files.filter(Boolean),
+      english: answers
+    });
+  }).then(function (r) {
+    if (!r.ok) throw new Error(r.error);
+    $('#refLine').textContent = 'Your reference: ' + r.appId;
+    show('done');
+  }).catch(function (err) {
+    sent = false;
+    show('3t');
+    fail('#err3', 'Sending failed (' + (err && err.message || 'network error') + '). Please check your internet and click Submit again.');
+  });
+}
+</script>
+</body>
+</html>
